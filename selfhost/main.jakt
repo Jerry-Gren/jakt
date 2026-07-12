@@ -29,7 +29,7 @@ import types { FunctionId, ResolvedNamespace, ScopeId, ModuleId, Value, ValueImp
 import utility { FileId, Queue, Span, escape_for_quotes, join, write_to_file }
 import git
 
-import platform_fs() { DirectoryIterator, make_directory }
+import platform_fs() { DirectoryIterator, make_directory, path_points_to_directory }
 
 import platform_compiler() {
     run_compiler
@@ -202,7 +202,12 @@ fn install(from: Path, to: Path) throws {
                 continue
             }
 
-            // FIXME: Symlink
+            if path_points_to_directory(path) {
+                try make_directory(path: to.join(path_relative_to_target.to_string()).to_string())
+                directories_to_copy.enqueue((path, path_relative_to_target))
+                continue
+            }
+
             try mkdir_p(path: to.join(path_relative_to_target.to_string()).parent())
             let target_path = to.join(path_relative_to_target.to_string())
             mut input_file = File::open_for_reading(path.to_string())

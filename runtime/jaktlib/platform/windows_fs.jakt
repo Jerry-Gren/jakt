@@ -30,6 +30,18 @@ fn make_directory(path: String) throws {
     }
 }
 
+fn path_points_to_directory(path: Path) -> bool {
+    mut is_directory = false
+    unsafe {
+        cpp {
+            "DWORD attributes = GetFileAttributesA(path.to_string().characters());"
+            "if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY))"
+            "is_directory = true;"
+        }
+    }
+    return is_directory
+}
+
 fn real_path(anon path: String) throws -> String {
     let buffer = _fullpath(abs_path: null<raw c_char>(), rel_path: path.c_string(), max_length: 0)
     if buffer == null<raw c_char>() {
